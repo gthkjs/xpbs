@@ -21,6 +21,10 @@ server.get("/", (req, res) => {
 	res.render("root");
 });
 
+server.get("*", (req, res) => {
+	res.redirect("/");
+});
+
 server.listen(port, () => {
 	console.log(`http://localhost:${port}`);
 });
