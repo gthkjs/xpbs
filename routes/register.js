@@ -5,8 +5,10 @@
 import { Router } from "express";
 import bodyParser from "body-parser";
 import pg from "pg";
+import bcrypt from "bcrypt";
 
 const router = Router();
+const saltRounds = 10;
 
 const client = new pg.Client({
 	host: "localhost",
@@ -35,13 +37,23 @@ router.post("/", async (req, res) => {
 	if (response.rows.length === 0) {
 		// add the user if the email does not exist
 		try {
-			const query = {
-				name: "Will this user be created?",
-				text: "INSERT INTO users (email,hash) VALUES ($1,$2)",
-				values: [req.body.email, req.body.password],
-			};
-			await client.query(query);
-			res.redirect("/login");
+			bcrypt.hash(
+				req.body.password,
+				saltRounds,
+				async function (err, hash) {
+					if (err) {
+						res.redirect("/register");
+					} else {
+						const query = {
+							name: "Will this user be created?",
+							text: "INSERT INTO users (email,hash) VALUES ($1,$2)",
+							values: [req.body.email, hash],
+						};
+						await client.query(query);
+						res.redirect("/login");
+					}
+				}
+			);
 		} catch (err) {
 			console.log(err);
 			res.redirect("/register");

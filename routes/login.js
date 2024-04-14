@@ -8,6 +8,7 @@ import pg from "pg";
 import cookieParser from "cookie-parser";
 import express from "express";
 import CryptoJS from "crypto-js";
+import bcrypt from "bcrypt";
 
 const router = Router();
 
@@ -25,11 +26,28 @@ router.use(bodyParser.urlencoded({ extended: false }));
 router.use(express.urlencoded({ extended: false }));
 router.use(cookieParser("Secret Key"));
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
 	if (req.cookies.Login_Cookie) {
-		console.log("cookie found");
+		var login_key = req.cookies.Login_Cookie;
+		var fake_hash = CryptoJS.AES.decrypt(login_key, "Secret");
+		var original_hash = fake_hash.toString(CryptoJS.enc.Utf8);
+		try {
+			const query = {
+				name: "Has this user been here before?",
+				text: "SELECT * FROM users WHERE hash = $1",
+				values: [original_hash],
+			};
+			const response = await client.query(query);
+			if (response.rows.length > 0) {
+				res.redirect("/dashboard");
+			} else {
+			}
+		} catch (err) {
+			if (err) {
+				res.redirect("/login");
+			}
+		}
 	} else {
-		console.log("cookie not found");
 	}
 	res.render("login");
 });
@@ -38,23 +56,29 @@ router.post("/", async (req, res) => {
 	// check if the user has the correct credentials
 	const query = {
 		name: "Does this user exist?",
-		text: "SELECT * FROM users WHERE email = $1 AND hash = $2",
-		values: [req.body.email, req.body.password],
+		text: "SELECT * FROM users WHERE email = $1",
+		values: [req.body.email],
 	};
 	const response = await client.query(query);
-	var loginInfo = "Very Hard Hash";
-	if (response.rows.length > 0) {
-		res.cookie("Login_Cookie", loginInfo, {
-			httpOnly: false,
-			maxAge: 1000000,
-			encode: (hash) => {
-				return CryptoJS.AES.encrypt(hash, "Secret Key").toString();
-			},
-		});
-		res.redirect("/dashboard");
-	} else {
-		res.redirect("/login");
-	}
+	const real_hash = response.rows[0].hash;
+	bcrypt.compare(req.body.password, real_hash, function (err, result) {
+		if (err) {
+			res.redirect("/login");
+		}
+		if (result) {
+			res.cookie("Login_Cookie", real_hash, {
+				httpOnly: true,
+				maxAge: 1000 * 60 * 60 * 24,
+				encode: (hash) => {
+					return CryptoJS.AES.encrypt(hash, "Secret").toString();
+				},
+			});
+			res.redirect("/dashboard");
+		} else {
+			res.redirect("/login");
+		}
+		console.log(result);
+	});
 });
 
 export default router;
