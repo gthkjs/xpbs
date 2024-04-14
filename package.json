@@ -1,0 +1,30 @@
+{
+  "name": "xpbs",
+  "version": "1.0.0",
+  "description": "Express Basics",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gthkjs/xpbs.git"
+  },
+  "author": "gthkjs@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gthkjs/xpbs/issues"
+  },
+  "homepage": "https://github.com/gthkjs/xpbs#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "pg": "^8.11.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
