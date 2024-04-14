@@ -26,6 +26,11 @@ router.use(express.urlencoded({ extended: false }));
 router.use(cookieParser("Secret Key"));
 
 router.get("/", (req, res) => {
+	if (req.cookies.Login_Cookie) {
+		console.log("cookie found");
+	} else {
+		console.log("cookie not found");
+	}
 	res.render("login");
 });
 
@@ -39,9 +44,9 @@ router.post("/", async (req, res) => {
 	const response = await client.query(query);
 	var loginInfo = "Very Hard Hash";
 	if (response.rows.length > 0) {
-		res.cookie("Login Cookie", loginInfo, {
+		res.cookie("Login_Cookie", loginInfo, {
 			httpOnly: false,
-			maxAge: 10000,
+			maxAge: 1000000,
 			encode: (hash) => {
 				return CryptoJS.AES.encrypt(hash, "Secret Key").toString();
 			},
