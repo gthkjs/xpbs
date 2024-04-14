@@ -10,7 +10,7 @@ const router = Router();
 router.use(bodyParser.urlencoded({ extended: false }));
 
 router.get("/", (req, res) => {
-	res.render("login");
+	res.render("register");
 });
 
 router.post("/", (req, res) => {
