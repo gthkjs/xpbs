@@ -5,7 +5,6 @@
 import { Router } from "express";
 import bodyParser from "body-parser";
 import pg from "pg";
-import { name } from "ejs";
 
 const router = Router();
 
